@@ -12,6 +12,10 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
+import android.util.Log
+import android.graphics.drawable.GradientDrawable
+
+
 
 /**
  * 사용자로부터 점을 찍어 경유지를 입력받고, 이를 기반으로 경로를 계산 및 표시하는 커스텀 MapView 클래스
@@ -60,6 +64,25 @@ class DrawingMapView @JvmOverloads constructor(
         return super.onTouchEvent(event)
     }
 
+    // 새로운 함수 추가
+    private fun updatePolyline() {
+        // 기존 polyline 제거
+        roadOverlay?.let { overlays.remove(it) }
+
+        // 새로운 polyline 생성
+        if (waypoints.size > 1) {  // 점이 2개 이상일 때만 선을 그림
+            val polyline = Polyline().apply {
+                setPoints(waypoints)
+                outlinePaint.color = Color.BLUE
+                outlinePaint.strokeWidth = 5.0f
+            }
+
+            overlays.add(polyline)
+            roadOverlay = polyline
+        }
+        invalidate()
+    }
+
     /**
      * 사용자가 찍은 점을 경유지로 추가하고 마커 표시
      * @param point 추가할 경유지의 위치
@@ -67,17 +90,43 @@ class DrawingMapView @JvmOverloads constructor(
     private fun addWaypoint(point: GeoPoint) {
         waypoints.add(point)
 
-        // 마커 생성 및 설정
+        Log.d("DrawPath", "새로운 경유지 추가: 위도=${point.latitude}, 경도=${point.longitude}")
+        Log.d("DrawPath", "총 경유지 개수: ${waypoints.size}")
+
+        // 동그라미 마커 생성
         val marker = Marker(this).apply {
             position = point
-            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            icon = ContextCompat.getDrawable(context, R.drawable.ic_marker_2)?.apply {
-                setTint(Color.BLUE)
+            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER) // 중앙 정렬
+
+            // 동그라미 drawable 생성
+            val circleDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setSize(40, 40) // dp 단위로 크기 설정
+
+                when (waypoints.size) {
+                    1 -> { // 출발지
+                        setColor(Color.GREEN)
+                        title = "출발"
+                    }
+                    waypoints.size -> { // 도착지
+                        setColor(Color.RED)
+                        title = "도착"
+                    }
+                    else -> { // 경유지
+                        setColor(Color.BLUE)
+                        title = "경유지 ${waypoints.size - 1}"
+                    }
+                }
             }
+
+            icon = circleDrawable
         }
+
         overlays.add(marker)
-        invalidate()
+        updatePolyline() // 선 업데이트
     }
+
+
 
     /**
      * 저장된 모든 경유지 목록 반환
