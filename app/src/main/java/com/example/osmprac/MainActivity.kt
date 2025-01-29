@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    // 내비게이션 시작 - 필터링 전 코드
+    // 내비게이션 시작 - 필터링 전
     private fun startNavigation() {
         locationTracker.startTracking()
         binding.navigationPanel.visibility = View.VISIBLE
