@@ -22,7 +22,12 @@ class NavigationManager(
         val direction: Float,        // 회전 각도
         val instruction: String,     // 음성 안내 텍스트
         val remainingDistance: Double // 목적지까지 남은 총 거리
-    )
+    ) {
+        companion object {
+            const val MIN_DISTANCE_THRESHOLD = 10.0  // 최소 거리 임계값 (미터)
+        }
+    }
+
 
     private var tts: TextToSpeech? = null
     private var routePoints: List<GeoPoint> = emptyList()

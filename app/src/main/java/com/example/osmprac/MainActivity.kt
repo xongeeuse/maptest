@@ -19,9 +19,8 @@ import com.example.osmprac.map.NavigationManager
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import android.view.View
-import org.osmdroid.bonuspack.routing.Road
-import android.util.Log
 import org.osmdroid.views.overlay.Marker
+import android.util.Log
 
 class MainActivity : AppCompatActivity() {
     // 필요한 클래스 인스턴스 선언
@@ -89,24 +88,10 @@ class MainActivity : AppCompatActivity() {
 
     // 버튼 설정
     private fun setupButtons() {
-        // 그리기 버튼
-        binding.btnDraw.setOnClickListener {
+        // 경유지 추가 버튼
+        binding.btnAddWaypoint.setOnClickListener {
+            // 경유지 추가 모드 토글
             map.toggleDrawingMode()
-            if (map.isDrawingMode) {
-                locationTracker.stopTracking()
-            } else {
-                locationTracker.startTracking()
-            }
-        }
-
-        // 경로점 확인을 위한 테스트 코드
-        binding.btnDraw.setOnLongClickListener {
-            val points = map.getDrawnPath()
-            Log.d("DrawPath", "총 좌표 개수: ${points.size}")
-            points.forEach { point ->
-                Log.d("DrawPath", "Latitude: ${point.latitude}, Longitude: ${point.longitude}")
-            }
-            true
         }
 
         // 경로 계산 버튼
@@ -118,39 +103,21 @@ class MainActivity : AppCompatActivity() {
         binding.btnStartNavigation.setOnClickListener {
             startNavigation()
         }
+
+        // 경로 초기화 버튼
+        binding.btnClearRoute.setOnClickListener {
+            clearRoute()
+        }
     }
 
     // 경로 계산
     private fun calculateRoute() {
         lifecycleScope.launch {
-            val drawnPoints = map.getDrawnPath()
-            if (drawnPoints.size < 2) {
+            val waypoints = map.getWaypoints()
+            if (waypoints.size < 2) {
                 // 최소 2개 포인트 필요
                 return@launch
             }
-
-            val startPoint = drawnPoints.first()
-            val endPoint = drawnPoints.last()
-
-            // 출발점 마커 추가
-            val startMarker = Marker(map).apply {
-                position = startPoint
-                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                title = "출발"
-            }
-            map.overlays.add(startMarker)
-
-            // 도착점 마커 추가
-            val endMarker = Marker(map).apply {
-                position = endPoint
-                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                title = "도착"
-            }
-            map.overlays.add(endMarker)
-
-
-            // 여기에 새로운 waypoints 코드를 추가
-            val waypoints = ArrayList<GeoPoint>(drawnPoints)
 
             val road = routeManager.calculateRoute(waypoints)
             road?.let {
@@ -163,31 +130,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    // 내비게이션 시작 - 필터링 전
+    // 내비게이션 시작
     private fun startNavigation() {
         locationTracker.startTracking()
         binding.navigationPanel.visibility = View.VISIBLE
-        // 경로 포인트 설정
-        val points = map.getDrawnPath()
-        if (points.isNotEmpty()) {
+        val waypoints = map.getWaypoints()
+        if (waypoints.isNotEmpty()) {
             lifecycleScope.launch {
-                Log.d("Navigation", "Setting route with ${points.size} points")
-                // 전체 경로를 내비게이션 매니저에 전달
-                navigationManager.setRoute(points)
+                Log.d("Navigation", "Setting route with ${waypoints.size} waypoints")
+                navigationManager.setRoute(waypoints)
                 Log.d("Navigation", "Route set completed")
             }
         }
     }
 
+    // 경로 초기화
+    private fun clearRoute() {
+        map.clearWaypoints()
+        binding.txtTotalDistance.visibility = View.GONE
+        binding.navigationPanel.visibility = View.GONE
+    }
 
     // 내비게이션 UI 업데이트
     private fun updateNavigationUI(info: NavigationManager.NavigationInfo) {
         binding.apply {
             txtNextInstruction.text = info.instruction
-            txtDistance.text = "${info.distance.toInt()}m"
-            // remainingDistance도 표시해야 함
-            txtRemaining.text = "남은 거리: ${(info.remainingDistance / 1000).toInt()}km"
+            txtDistance.text = routeManager.formatDistance(info.distance)  // Double 타입용
+            txtRemaining.text = "남은 거리: ${routeManager.formatDistance(info.remainingDistance)}"  // Double 타입용
         }
     }
 

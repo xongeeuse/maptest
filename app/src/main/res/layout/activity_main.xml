@@ -5,71 +5,118 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- 지도 뷰 - 전체 화면의 80% 정도 차지하도록 설정 -->
     <com.example.osmprac.map.DrawingMapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/navigationPanel"/>
+        app:layout_constraintBottom_toTopOf="@id/navigationPanel"
+        app:layout_constraintHeight_percent="0.8"/>
 
-    <LinearLayout
+    <!-- 내비게이션 정보 패널 - 카드뷰로 감싸서 시각적으로 구분 -->
+    <androidx.cardview.widget.CardView
         android:id="@+id/navigationPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
         app:layout_constraintBottom_toTopOf="@id/buttonContainer">
 
-        <TextView
-            android:id="@+id/txtTotalDistance"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="right"
-            android:layout_marginBottom="8dp"/>
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <TextView
-            android:id="@+id/txtNextInstruction"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/txtTotalDistance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="8dp"
+                android:textColor="@android:color/black"/>
 
-        <TextView
-            android:id="@+id/txtDistance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
 
-        <TextView
-            android:id="@+id/txtRemaining"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/txtNextInstruction"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"/>
 
-    <LinearLayout
+                <TextView
+                    android:id="@+id/txtDistance"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:textSize="16sp"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txtRemaining"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- 버튼 컨테이너 - 그리드 레이아웃으로 변경하여 정렬 개선 -->
+    <GridLayout
         android:id="@+id/buttonContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
+        android:padding="8dp"
+        android:columnCount="2"
+        android:rowCount="2"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <Button
-            android:id="@+id/btnDraw"
-            android:layout_width="wrap_content"
+            android:id="@+id/btnAddWaypoint"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="그리기"/>
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:text="경유지 추가"
+            style="@style/Widget.MaterialComponents.Button"/>
 
         <Button
             android:id="@+id/btnCalculateRoute"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="경로 계산"/>
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:text="경로 계산"
+            style="@style/Widget.MaterialComponents.Button"/>
 
         <Button
             android:id="@+id/btnStartNavigation"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="내비게이션 시작" />
-    </LinearLayout>
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:text="내비게이션 시작"
+            style="@style/Widget.MaterialComponents.Button"/>
+
+        <Button
+            android:id="@+id/btnClearRoute"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:text="경로 초기화"
+            style="@style/Widget.MaterialComponents.Button"/>
+    </GridLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
